@@ -1,7 +1,7 @@
 hash-table-benchmark
 =======================
 
-Benchmark of hash tables
+Benchmark of hash tables with string keys and Google farmhash as hash function
 
 Google Compute Engine, n1-highmem-2 (2 vCPU, 13 GB memory), x86_64 Intel(R) Xeon(R) CPU @ 2.60GHz GenuineIntel GNU/Linux 
 
