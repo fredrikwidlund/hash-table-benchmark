@@ -30,25 +30,25 @@ struct str {
   }
 };
 
-#if STANDARD
+#if STANDARD_STR
 #define VARIANT_DECLARE std::unordered_map <const char *, int, struct hash, struct equal_to> *m;
 #define VARIANT_NEW     m = new std::unordered_map<const char *, int, struct hash, struct equal_to>(); m->max_load_factor(0.5);
 #define VARIANT_INSERT  m->insert(std::make_pair(data[j], j));
 #define VARIANT_LOOKUP  sum += (*m)[data[j]];
 #define VARIANT_DELETE  delete m;
-#elif DYNAMIC
+#elif DYNAMIC_STR
 #define VARIANT_DECLARE map_str *m;   
 #define VARIANT_NEW     m = map_str_new(sizeof i);
 #define VARIANT_INSERT  map_str_insert(m, data[j], &j);
 #define VARIANT_LOOKUP  sum += *(int *) map_str_at(m, data[j]);
 #define VARIANT_DELETE  map_str_free(m);
-#elif DENSEHASH
+#elif DENSEHASH_STR
 #define VARIANT_DECLARE google::dense_hash_map<const char *, uint32_t, struct hash, struct equal_to> *m;
 #define VARIANT_NEW     m = new google::dense_hash_map<const char *, uint32_t, struct hash, struct equal_to>(); m->set_empty_key(""); m->max_load_factor(0.5);
 #define VARIANT_INSERT  m->insert(std::make_pair(data[j], j));
 #define VARIANT_LOOKUP  sum += (*m)[data[j]];
 #define VARIANT_DELETE  delete m;
-#elif ULIB
+#elif ULIB_STR
 #define VARIANT_DECLARE open_hash_map<str, int> *m;
 #define VARIANT_NEW     m = new open_hash_map<str, int>();
 #define VARIANT_INSERT  (*m)[data[j]] = j;
