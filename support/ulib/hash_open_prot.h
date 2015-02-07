@@ -72,7 +72,7 @@ enum {
 	OH_INS_DEL = 2	 /**< element was placed at a deleted bucket */
 };
 
-#define OH_LOAD_FACTOR 0.7
+#define OH_LOAD_FACTOR 0.5
 
 #define DEFINE_OPENHASH_RAW(name, key_t, keyref_t, val_t, ismap, hashfn, equalfn) \
 	typedef struct {						\

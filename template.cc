@@ -54,7 +54,6 @@ struct str {
 #define VARIANT_INSERT  (*m)[data[j]] = j;
 #define VARIANT_LOOKUP  sum += (*m)[data[j]];
 #define VARIANT_DELETE  delete m;
-
 #else
 #error "Please define a variant"
 #endif 
