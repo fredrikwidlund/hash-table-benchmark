@@ -9,6 +9,26 @@
 #include <farmhash.h>
 #include <unordered_map>
 #include <sparsehash/dense_hash_map>
+#include <ulib/hash_func.h>
+#include <ulib/hash_open.h>
+
+using namespace ulib;
+
+struct str {
+  const char *c_str;
+
+  str(const char *s = 0) : c_str(s) { }
+
+  operator size_t() const
+  {
+    return util::Hash64(c_str, strlen(c_str));
+  }
+
+  bool operator==(const str &other) const
+  {
+    return strcmp(c_str, other.c_str) == 0;
+  }
+};
 
 #if STANDARD
 #define VARIANT_DECLARE std::unordered_map <const char *, int, struct hash, struct equal_to> *m;
@@ -28,6 +48,13 @@
 #define VARIANT_INSERT  m->insert(std::make_pair(data[j], j));
 #define VARIANT_LOOKUP  sum += (*m)[data[j]];
 #define VARIANT_DELETE  delete m;
+#elif ULIB
+#define VARIANT_DECLARE open_hash_map<str, int> *m;
+#define VARIANT_NEW     m = new open_hash_map<str, int>();
+#define VARIANT_INSERT  (*m)[data[j]] = j;
+#define VARIANT_LOOKUP  sum += (*m)[data[j]];
+#define VARIANT_DELETE  delete m;
+
 #else
 #error "Please define a variant"
 #endif 
@@ -115,8 +142,6 @@ struct hash
 {
   size_t operator() (const char *key) const {
     return util::Hash64(key, strlen(key));
-    
-    //    return cfarmhash(key, strlen(key));
   }  
 };
 
@@ -131,7 +156,7 @@ int main(int argc, char **argv)
 {
   long sum, i, j, k, n;
   uint64_t t1, t2;
-  double t, rpns;
+  double t_lookup, t_insert;
   vector *dataset;
   vector *dict;
   char **data;
@@ -150,7 +175,8 @@ int main(int argc, char **argv)
   if (!dict)
     err(1, "load");
 
-  t = 0;
+  t_insert = 0;
+  t_lookup = 0;
   for (i = 0; i < k; i ++)
     {
       sum = 0;
@@ -164,15 +190,18 @@ int main(int argc, char **argv)
       if (!m)
 	err(1, "map_str_new");
       
+      t1 = ntime();
       for (j = 0; j < n; j ++)
 	VARIANT_INSERT
+      t2 = ntime();
+      t_insert += t2 - t1;
       
       shuffle(data, n);
       t1 = ntime();
       for (j = 0; j < n; j ++)
 	VARIANT_LOOKUP
       t2 = ntime();
-      t += t2 - t1;
+      t_lookup += t2 - t1;
 
       VARIANT_DELETE
       vector_free(dataset);
@@ -180,10 +209,11 @@ int main(int argc, char **argv)
       if (sum != (n / 2) * (n - 1))
 	errx(1, "invalid checksum");
     }
+
+  t_insert /= 1000000000.;
+  t_lookup /= 1000000000.;
   
-  t /= 1000000000.;
-  rpns = k * n / t;
-  (void) fprintf(stdout, "%.2f\n", rpns);
+  (void) fprintf(stdout, "%.2f %.2f\n", k * n / t_insert, k * n / t_lookup);
 
   vector_free(dict);
 }

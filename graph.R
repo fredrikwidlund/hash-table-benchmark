@@ -7,6 +7,7 @@ library(sitools)
 data.densehash <- read.csv("densehash.dat", head=TRUE, sep=",")
 data.dynamic <- read.csv("dynamic.dat", head=TRUE, sep=",")
 data.standard <- read.csv("standard.dat", head=TRUE, sep=",")
+data.ulib <- read.csv("ulib.dat", head=TRUE, sep=",")
 
 graph <- ggplot(legend = TRUE) + 
   ggtitle('Hash table benchmark') +
@@ -16,6 +17,7 @@ graph <- ggplot(legend = TRUE) +
   geom_line(data = data.densehash, aes(x = size, y = rate, colour = "google::dense_hash_map")) +
   geom_line(data = data.dynamic, aes(x = size, y = rate, colour = "libdynamic")) +
   geom_line(data = data.standard, aes(x = size, y = rate, colour = "std::unordered_map")) +
+  geom_line(data = data.ulib, aes(x = size, y = rate, colour = "ulib")) +
   scale_y_continuous(labels = comma) +
   scale_x_continuous(labels = comma) +
   scale_colour_manual("",
