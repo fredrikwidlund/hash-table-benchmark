@@ -10,8 +10,22 @@
 #include <sparsehash/dense_hash_map>
 #include <ulib/hash_func.h>
 #include <ulib/hash_open.h>
+#include <tommyds/tommyhashdyn.h>
 
 using namespace ulib;
+
+/* tommyds support routines */
+
+struct object {
+  tommy_node node;
+  int key;
+  int value;
+};
+
+int compare(const void *arg, const void *obj)
+{
+  return *(int *) arg != ((struct object *)obj)->key;
+}
 
 #if STANDARD_INT
 #define VARIANT_DECLARE std::unordered_map <int, int> *m;
@@ -37,6 +51,12 @@ using namespace ulib;
 #define VARIANT_INSERT  (*m)[data[j]] = j;
 #define VARIANT_LOOKUP  sum += (*m)[data[j]];
 #define VARIANT_DELETE  delete m;
+#elif TOMMYDS_INT
+#define VARIANT_DECLARE tommy_hashdyn *m;
+#define VARIANT_NEW     m = (tommy_hashdyn *) malloc(sizeof *m); tommy_hashdyn_init(m);
+#define VARIANT_INSERT  {struct object *object = (struct object *) malloc(sizeof(*object)); object->key = data[j]; object->value = j; tommy_hashdyn_insert(m, &object->node, object, data[j]);}
+#define VARIANT_LOOKUP  {struct object* object = (struct object *) tommy_hashdyn_search(m, compare, &data[j], data[j]); sum += object->value;}
+#define VARIANT_DELETE  tommy_hashdyn_done(m); free(m);
 #else
 #error "Please define a variant"
 #endif 
