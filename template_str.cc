@@ -151,11 +151,15 @@ struct equal_to
   }
 };
 
+int t_compare(const void *a, const void *b)
+{
+  return *(double *) b - *(double *) a;
+}
+
 int main(int argc, char **argv)
 {
   long sum, i, j, k, n;
   uint64_t t1, t2;
-  double t_lookup, t_insert;
   vector *dataset;
   vector *dict;
   char **data;
@@ -174,8 +178,7 @@ int main(int argc, char **argv)
   if (!dict)
     err(1, "load");
 
-  t_insert = 0;
-  t_lookup = 0;
+  double t_lookup[k], t_insert[k];
   for (i = 0; i < k; i ++)
     {
       sum = 0;
@@ -193,14 +196,14 @@ int main(int argc, char **argv)
       for (j = 0; j < n; j ++)
 	VARIANT_INSERT
       t2 = ntime();
-      t_insert += t2 - t1;
+      t_insert[i] = t2 - t1;
       
       shuffle(data, n);
       t1 = ntime();
       for (j = 0; j < n; j ++)
 	VARIANT_LOOKUP
       t2 = ntime();
-      t_lookup += t2 - t1;
+      t_lookup[i] = t2 - t1;
 
       VARIANT_DELETE
       vector_free(dataset);
@@ -209,10 +212,10 @@ int main(int argc, char **argv)
 	errx(1, "invalid checksum");
     }
 
-  t_insert /= 1000000000.;
-  t_lookup /= 1000000000.;
+  qsort(t_insert, k, sizeof t_insert[0], t_compare);
+  qsort(t_lookup, k, sizeof t_lookup[0], t_compare);
   
-  (void) fprintf(stdout, "%.2f %.2f\n", k * n / t_insert, k * n / t_lookup);
+  (void) fprintf(stdout, "%f %f\n", 1000000000 * n / t_insert[k / 2], 1000000000 * n / t_lookup[k / 2]);
 
   vector_free(dict);
 }
