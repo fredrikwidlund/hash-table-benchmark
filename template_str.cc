@@ -75,7 +75,7 @@ struct str {
 #define VARIANT_NEW     m = (tommy_hashdyn *) malloc(sizeof *m); tommy_hashdyn_init(m);
 #define VARIANT_INSERT  {struct object *object = (struct object *) malloc(sizeof(*object)); object->key = data[j]; object->value = j; tommy_hashdyn_insert(m, &object->node, object, util::Hash64(data[j], strlen(data[j])));}
 #define VARIANT_LOOKUP  {struct object* object = (struct object *) tommy_hashdyn_search(m, compare, &data[j], util::Hash64(data[j], strlen(data[j]))); sum += object->value;}
-#define VARIANT_DELETE  tommy_hashdyn_done(m); free(m);
+#define VARIANT_DELETE  tommy_hashdyn_done(m); free(m); /* NOTE: we need to delete all objects to avoid leaks */
 #else
 #error "Please define a variant"
 #endif 
